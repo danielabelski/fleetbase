@@ -1950,6 +1950,9 @@ erDiagram
     TIMESTAMP last_executed_at
     INT execution_time "Execution time in milliseconds"
     INT row_count
+    INTUNSIGNED execution_count
+    DOUBLE average_execution_time "Mean execution time in milliseconds across all runs"
+    INT last_result_count
     BIT is_scheduled
     JSON schedule_config
     JSON export_formats
@@ -2999,6 +3002,7 @@ erDiagram
     CHAR store_uuid FK
     CHAR network_uuid FK
     CHAR gateway_uuid FK
+    VARCHAR stripe_payment_intent_id UK
     CHAR service_quote_uuid FK
     CHAR owner_uuid
     VARCHAR owner_type
