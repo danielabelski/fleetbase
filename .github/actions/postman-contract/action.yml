@@ -343,6 +343,11 @@ runs:
         #     Update Authenticated Customer is a no-op rename rather than a surprise.
         # verification_code must equal what mint-api-key.php seeded — both read the same
         # action input, so they cannot drift.
+        # driver_password_reset_code is the same seeded value, but it is a SEPARATE
+        # variable because it stands for a different row: DriverController::resetPassword
+        # matches `for=driver_password_reset`, which a driver login code does not satisfy.
+        # Collapsing it into verification_code would work only for as long as both rows
+        # are seeded with the same code.
         # base64_file_data / from_datetime / to_datetime were referenced by requests but
         # set by nothing — see scripts/ci/find-unsourced-variables.py. An unresolved
         # variable is sent literally, so those requests were exercising the API with the
@@ -377,6 +382,7 @@ runs:
           '  --env-var "driver_identity=${DRIVER_IDENTITY}" \' \
           '  --env-var "driver_password=${DRIVER_PASSWORD}" \' \
           '  --env-var "driver_phone=${DRIVER_PHONE}" \' \
+          '  --env-var "driver_password_reset_code=${VERIFICATION_CODE}" \' \
           '  --env-var "device_token=ci-contract-device-token" \' \
           '  --env-var "base64_file_data=iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAbElEQVR42hXNQRUAUQhCUaMYhShGeVGIQhSizB+XXA7ODDtouIHBQ4YOM8suWm5h8ZKl+0CskDiBsIioHhx76LiDw0eO3oN/4FVf+J8h0PduzBqZ8x/bxNQPwgaFy192SGgelC0q13/CJaXlA8Z7WAFXOTbyAAAAAElFTkSuQmCC" \' \
           '  --env-var "from_datetime=2026-01-01T00:00:00Z" \' \
