@@ -274,6 +274,19 @@ try {
     $driverCode->code = $customerCode;
     $driverCode->save();
 
+    // DriverController::resetPassword matches subject_uuid + code + for, and its
+    // `for` is driver_password_reset — a login code will not satisfy it, so the
+    // reset flow needs a row of its own exactly as the customer reset does.
+    \Fleetbase\Models\VerificationCode::withoutGlobalScopes()
+        ->where(['subject_uuid' => $driverUser->uuid, 'for' => 'driver_password_reset'])
+        ->delete();
+    $driverResetCode             = \Fleetbase\Models\VerificationCode::generateFor($driverUser, 'driver_password_reset', false);
+    $driverResetCode->expires_at = \Illuminate\Support\Carbon::now()->addDay();
+    $driverResetCode->status     = 'active';
+    $driverResetCode->save();
+    $driverResetCode->code = $customerCode;
+    $driverResetCode->save();
+
     /* ============================================================
      | SECOND ORGANIZATION (Switch Driver Organization)
      * ============================================================ */
