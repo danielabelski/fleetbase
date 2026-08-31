@@ -136,13 +136,21 @@ RUN_LATE = {
         'Cart/Remove item from cart',   # leaves cart A empty, which is the point
 
         # Cart B — priced, checked out, and turned into an order.
+        #
+        # Capture requires a PAID checkout since storefront's Stripe verification
+        # (fleetbase/storefront#95), and this run can never complete a card payment. So
+        # the stripe checkout is only read (status, intent update) and then captured as
+        # an explicit 402 negative contract, while the order the rest of the run needs
+        # comes from a cash pickup checkout, which needs no provider payment.
         'Cart/Retrieve or Create Cart',
         'Cart/Add Item to Cart',
         'Delivery Service Quote/Retrieve a Delivery Service Quote ❗',  # prices the cart
         'Checkout/Before ❗',                    # needs the cart AND {{service_quote_id}}
-        'Checkout/Capture checkout as order',    # needs {{checkout_token}} from Before
-        'Checkout/Get Checkout Status',          # ditto
-        'Checkout/Update Stripe Payment Intent', # needs the cart and the service quote
+        'Checkout/Get Checkout Status',          # needs {{checkout_token}}+{{checkout_id}} from Before
+        'Checkout/Update Stripe Payment Intent', # needs the cart and the service quote, BEFORE capture consumes the cart
+        'Checkout/Capture Stripe checkout without payment',  # 402 contract for the unpaid stripe checkout
+        'Checkout/Before Cash Pickup Checkout',  # needs the cart; sets {{cash_checkout_token}}
+        'Checkout/Capture checkout as order',    # captures the CASH checkout into a real order
         # {{order_id}} is captured by Capture checkout as order — the only request that
         # creates a storefront order.
         'Orders/Complete Order Pickup',
