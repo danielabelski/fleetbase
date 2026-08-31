@@ -31,7 +31,10 @@ Fleetbase `0.7.56` focuses on security, API reliability, and release-branch fixe
 - Added driver-facing route manifests so drivers can read, run, and re-sequence route stops.
 - Added a driver card view with a persisted card/table layout preference.
 - Published the order configuration flow graph so API consumers can sequence order setup steps.
-- Added configurable Leaflet tile providers with keyless OpenStreetMap defaults.
+- Added configurable Leaflet tile providers with keyless OpenStreetMap defaults, and served Leaflet's
+  marker icons from the Leaflet package instead of a remote CDN.
+- Sped up order stop sequencing by ordering on geometry instead of issuing a routing call per stop pair.
+- Fixed a driver's password being settable through a general driver update.
 - Fixed vehicle updates dropping odometer values.
 - Fixed issue and fuel-report list filters so driver-scoped aliases apply correctly.
 - Fixed driver password updates, driver creation password persistence, unsaved geocoded place editing, sensor creation defaults, register-device routes, fuel report creation, geofence driver history, QR debug output, and maintenance vehicle schedule workflows.
@@ -53,6 +56,13 @@ Fleetbase `0.7.56` focuses on security, API reliability, and release-branch fixe
 - Added root API transaction tripwire diagnostics for detecting server/client transaction-state divergence when explicitly enabled.
 - Restored the upstream Octane listener set and pinned the dev compose command so Octane `--watch` is passed consistently.
 - Updated Console custom-field value typing so signature-pad fields are treated like file uploads.
+- Made the static binary build reproducible on GitHub-hosted runners: capped `static-php-cli`
+  concurrency to fit the runner's memory, switched to plain Docker build progress, and uploaded the
+  build log as an artifact when the job fails.
+- Bumped `FLEETBASE_VERSION` in the API image to `0.7.56`.
+- Brought the host API app to 100% line coverage and made its coverage gate blocking, matching the
+  Console gate. The transaction tripwire, outbound HTTP request logging, and the `auth`/`guest`
+  middleware now have tests.
 
 ---
 ## Bug Fixes
@@ -62,6 +72,8 @@ Fleetbase `0.7.56` focuses on security, API reliability, and release-branch fixe
 - Fixed root API/Octane behavior that could let a committed write surface as `422 There is no active transaction`.
 - Fixed dev compose behavior where Octane file watching could be silently dropped.
 - Fixed signature-pad custom fields falling through to text value handling instead of file value handling.
+- Fixed the `guest` middleware referencing an undefined `RouteServiceProvider::HOME`, which would have
+  raised a fatal error had any route used the alias.
 - Fixed Dev Engine API key expiration values not saving.
 - Fixed Fleet-Ops odometer, driver filter, password, route manifest, map tile, place editing, device, fuel report, geofence, QR, and maintenance issues.
 - Fixed Storefront QPay, Stripe, checkout capture, cash pickup, and customer ownership edge cases.
@@ -79,6 +91,8 @@ Fleetbase `0.7.56` focuses on security, API reliability, and release-branch fixe
 - Fleet-Ops exposes the order configuration flow graph for API consumers.
 - Fleet-Ops adds driver route manifest read/run/re-sequencing support.
 - Fleet-Ops driver-scoped issue and fuel-report filters now respect `driver_uuid` aliases.
+- Fleet-Ops no longer accepts a driver password through a general driver update; use the dedicated
+  password endpoint.
 - Storefront checkout capture is serialized and Stripe payments are verified before capture.
 
 ---
